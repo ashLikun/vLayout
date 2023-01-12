@@ -26,12 +26,12 @@ package com.ashlikun.vlayout;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_ID;
 
-import android.util.Pair;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
