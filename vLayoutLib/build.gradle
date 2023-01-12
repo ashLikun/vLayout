@@ -2,9 +2,6 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
-apply plugin: 'com.github.dcendents.android-maven'
-// GitHub账户名
-group = 'com.github.ashLikun'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 //    buildToolsVersion rootProject.ext.buildToolsVersion
@@ -41,9 +38,5 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compileOnly rootProject.ext.designVersion
-    compileOnly "androidx.recyclerview:recyclerview:1.2.1"
-    compileOnly "androidx.annotation:annotation:1.1.0"
 
 }
-
-apply from: '../maven.gradle'
