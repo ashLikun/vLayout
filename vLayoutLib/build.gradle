@@ -27,7 +27,7 @@ android {
     //java8
     compileOptions {
         //定义生成的META-INF/library_release文件名 More than one file was found with OS independent path 'META-INF/library_release.kotlin_module'
-        kotlinOptions.freeCompilerArgs += ['-module-name', 'com.ashlikun.vLayout']
+        kotlinOptions.freeCompilerArgs += ['-module-name', 'com.ashlikun.vlayout']
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
@@ -41,6 +41,9 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compileOnly rootProject.ext.designVersion
+    compileOnly "androidx.recyclerview:recyclerview:1.2.1"
+    compileOnly "androidx.annotation:annotation:1.1.0"
+
 }
 
 apply from: '../maven.gradle'
