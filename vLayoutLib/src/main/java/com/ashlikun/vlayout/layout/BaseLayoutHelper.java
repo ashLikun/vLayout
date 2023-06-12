@@ -183,7 +183,7 @@ public abstract class BaseLayoutHelper extends MarginLayoutHelper {
 
         if (requireLayoutView()) {
             if (isValidScrolled(scrolled) && mLayoutView != null) {
-                // initial layout do reset
+                // 初始布局重置
                 mLayoutRegion.union(mLayoutView.getLeft(), mLayoutView.getTop(), mLayoutView.getRight(), mLayoutView.getBottom());
             }
 
@@ -305,9 +305,6 @@ public abstract class BaseLayoutHelper extends MarginLayoutHelper {
 
     }
 
-    /**
-     * @return
-     */
     @Override
     public boolean requireLayoutView() {
         return mBackground != null || mLayoutViewBindListener != null;

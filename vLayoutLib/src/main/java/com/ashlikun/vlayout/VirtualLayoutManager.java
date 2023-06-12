@@ -63,7 +63,7 @@ import java.util.Map;
  * NOTE: 它将为recyclerview更改 {@link androidx.recyclerview.widget.RecyclerView.RecycledViewPool}。
  */
 
-public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayoutManagerEx implements LayoutManagerHelper {
+public class VirtualLayoutManager extends ExposeLinearLayoutManagerEx implements LayoutManagerHelper {
     protected static final String TAG = "VirtualLayoutManager";
 
     private static final String PHASE_MEASURE = "measure";
@@ -76,8 +76,8 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     public static final int VERTICAL = OrientationHelper.VERTICAL;
 
 
-    protected com.ashlikun.vlayout.OrientationHelperEx mOrientationHelper;
-    protected com.ashlikun.vlayout.OrientationHelperEx mSecondaryOrientationHelper;
+    protected OrientationHelperEx mOrientationHelper;
+    protected OrientationHelperEx mSecondaryOrientationHelper;
 
     private RecyclerView mRecyclerView;
 
@@ -99,9 +99,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
     private ViewLifeCycleHelper mViewLifeCycleHelper;
 
-    private Comparator<Pair<com.ashlikun.vlayout.Range<Integer>, Integer>> mRangeComparator = new Comparator<Pair<com.ashlikun.vlayout.Range<Integer>, Integer>>() {
+    private Comparator<Pair<Range<Integer>, Integer>> mRangeComparator = new Comparator<Pair<Range<Integer>, Integer>>() {
         @Override
-        public int compare(Pair<com.ashlikun.vlayout.Range<Integer>, Integer> a, Pair<com.ashlikun.vlayout.Range<Integer>, Integer> b) {
+        public int compare(Pair<Range<Integer>, Integer> a, Pair<Range<Integer>, Integer> b) {
             if (a == null && b == null) {
                 return 0;
             }
@@ -112,8 +112,8 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
                 return 1;
             }
 
-            com.ashlikun.vlayout.Range<Integer> lr = a.first;
-            com.ashlikun.vlayout.Range<Integer> rr = b.first;
+            Range<Integer> lr = a.first;
+            Range<Integer> rr = b.first;
 
             return lr.getLower() - rr.getLower();
         }
@@ -140,8 +140,8 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
      */
     public VirtualLayoutManager(@NonNull final Context context, int orientation, boolean reverseLayout) {
         super(context, orientation, reverseLayout);
-        this.mOrientationHelper = com.ashlikun.vlayout.OrientationHelperEx.createOrientationHelper(this, orientation);
-        this.mSecondaryOrientationHelper = com.ashlikun.vlayout.OrientationHelperEx.createOrientationHelper(this, orientation == VERTICAL ? HORIZONTAL : VERTICAL);
+        this.mOrientationHelper = OrientationHelperEx.createOrientationHelper(this, orientation);
+        this.mSecondaryOrientationHelper = OrientationHelperEx.createOrientationHelper(this, orientation == VERTICAL ? HORIZONTAL : VERTICAL);
         this.mCanScrollVertically = super.canScrollVertically();
         this.mCanScrollHorizontally = super.canScrollHorizontally();
         setHelperFinder(new RangeLayoutHelperFinder());
@@ -180,7 +180,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
         mMeasuredFullSpace = 0;
     }
 
-    private com.ashlikun.vlayout.LayoutHelperFinder mHelperFinder;
+    private LayoutHelperFinder mHelperFinder;
 
     public void setHelperFinder(@NonNull final LayoutHelperFinder finder) {
         //noinspection ConstantConditions
@@ -188,11 +188,11 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
             throw new IllegalArgumentException("finder is null");
         }
 
-        List<com.ashlikun.vlayout.LayoutHelper> helpers = new LinkedList<>();
+        List<LayoutHelper> helpers = new LinkedList<>();
         if (this.mHelperFinder != null) {
-            List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-            Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-            com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+            List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+            Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+            LayoutHelper layoutHelper = null;
             while (iterator.hasNext()) {
                 layoutHelper = iterator.next();
                 helpers.add(layoutHelper);
@@ -219,8 +219,8 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     /**
      * Temp hashMap
      */
-    private HashMap<Integer, com.ashlikun.vlayout.LayoutHelper> newHelpersSet = new HashMap<>();
-    private HashMap<Integer, com.ashlikun.vlayout.LayoutHelper> oldHelpersSet = new HashMap<>();
+    private HashMap<Integer, LayoutHelper> newHelpersSet = new HashMap<>();
+    private HashMap<Integer, LayoutHelper> oldHelpersSet = new HashMap<>();
 
     private BaseLayoutHelper.LayoutViewBindListener mLayoutViewBindListener;
 
@@ -229,20 +229,20 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
      *
      * @param helpers layoutHelper组
      */
-    public void setLayoutHelpers(@Nullable List<com.ashlikun.vlayout.LayoutHelper> helpers) {
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> it0 = layoutHelpers.iterator();
+    public void setLayoutHelpers(@Nullable List<LayoutHelper> helpers) {
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> it0 = layoutHelpers.iterator();
         while (it0.hasNext()) {
-            com.ashlikun.vlayout.LayoutHelper helper = it0.next();
+            LayoutHelper helper = it0.next();
             oldHelpersSet.put(System.identityHashCode(helper), helper);
         }
 
         // 设置范围
         if (helpers != null) {
             int start = 0;
-            Iterator<com.ashlikun.vlayout.LayoutHelper> it1 = helpers.iterator();
+            Iterator<LayoutHelper> it1 = helpers.iterator();
             while (it1.hasNext()) {
-                com.ashlikun.vlayout.LayoutHelper helper = it1.next();
+                LayoutHelper helper = it1.next();
                 if (helper instanceof FixAreaLayoutHelper) {
                     ((FixAreaLayoutHelper) helper).setAdjuster(mFixAreaAdjustor);
                 }
@@ -265,14 +265,14 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
         this.mHelperFinder.setLayouts(helpers);
 
         layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
         while (iterator.hasNext()) {
-            com.ashlikun.vlayout.LayoutHelper layoutHelper = iterator.next();
+            LayoutHelper layoutHelper = iterator.next();
             newHelpersSet.put(System.identityHashCode(layoutHelper), layoutHelper);
         }
 
-        for (Iterator<Map.Entry<Integer, com.ashlikun.vlayout.LayoutHelper>> it = oldHelpersSet.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Integer, com.ashlikun.vlayout.LayoutHelper> entry = it.next();
+        for (Iterator<Map.Entry<Integer, LayoutHelper>> it = oldHelpersSet.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Integer, LayoutHelper> entry = it.next();
             Integer key = entry.getKey();
             if (newHelpersSet.containsKey(key)) {
                 newHelpersSet.remove(key);
@@ -281,7 +281,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
         }
 
 
-        for (com.ashlikun.vlayout.LayoutHelper helper : oldHelpersSet.values()) {
+        for (LayoutHelper helper : oldHelpersSet.values()) {
             helper.clear(this);
         }
 
@@ -296,7 +296,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
 
     @NonNull
-    public List<com.ashlikun.vlayout.LayoutHelper> getLayoutHelpers() {
+    public List<LayoutHelper> getLayoutHelpers() {
         return this.mHelperFinder.getLayoutHelpers();
     }
 
@@ -321,7 +321,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
     @Override
     public void setOrientation(int orientation) {
-        this.mOrientationHelper = com.ashlikun.vlayout.OrientationHelperEx.createOrientationHelper(this, orientation);
+        this.mOrientationHelper = OrientationHelperEx.createOrientationHelper(this, orientation);
         super.setOrientation(orientation);
     }
 
@@ -363,7 +363,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
             mTempAnchorInfoWrapper.position = anchorInfo.mPosition;
             mTempAnchorInfoWrapper.coordinate = anchorInfo.mCoordinate;
             mTempAnchorInfoWrapper.layoutFromEnd = anchorInfo.mLayoutFromEnd;
-            com.ashlikun.vlayout.LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(anchorInfo.mPosition);
+            LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(anchorInfo.mPosition);
             if (layoutHelper != null) {
                 layoutHelper.checkAnchorInfo(state, mTempAnchorInfoWrapper, this);
             }
@@ -380,27 +380,27 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
         mTempAnchorInfoWrapper.position = anchorInfo.mPosition;
         mTempAnchorInfoWrapper.coordinate = anchorInfo.mCoordinate;
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.onRefreshLayout(state, mTempAnchorInfoWrapper, this);
         }
     }
 
-    public com.ashlikun.vlayout.LayoutHelper findNeighbourNonfixLayoutHelper(com.ashlikun.vlayout.LayoutHelper layoutHelper, boolean isLayoutEnd) {
+    public LayoutHelper findNeighbourNonfixLayoutHelper(LayoutHelper layoutHelper, boolean isLayoutEnd) {
         if (layoutHelper == null) {
             return null;
         }
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
         int index = layoutHelpers.indexOf(layoutHelper);
         if (index == -1) {
             return null;
         }
         int next = isLayoutEnd ? index - 1 : index + 1;
         if (next >= 0 && next < layoutHelpers.size()) {
-            com.ashlikun.vlayout.LayoutHelper helper = layoutHelpers.get(next);
+            LayoutHelper helper = layoutHelpers.get(next);
             if (helper != null) {
                 if (helper.isFixLayout()) {
                     return null;
@@ -423,7 +423,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     @Override
     protected int computeAlignOffset(int position, boolean isLayoutEnd, boolean useAnchor) {
         if (position != RecyclerView.NO_POSITION) {
-            com.ashlikun.vlayout.LayoutHelper helper = mHelperFinder.getLayoutHelper(position);
+            LayoutHelper helper = mHelperFinder.getLayoutHelper(position);
 
             if (helper != null) {
                 return helper.computeAlignOffset(position - helper.getRange().getLower(),
@@ -452,9 +452,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     private void runPreLayout(RecyclerView.Recycler recycler, RecyclerView.State state) {
 
         if (mNested == 0) {
-            List<com.ashlikun.vlayout.LayoutHelper> reverseLayoutHelpers = mHelperFinder.reverse();
-            Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = reverseLayoutHelpers.iterator();
-            com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+            List<LayoutHelper> reverseLayoutHelpers = mHelperFinder.reverse();
+            Iterator<LayoutHelper> iterator = reverseLayoutHelpers.iterator();
+            LayoutHelper layoutHelper = null;
             while (iterator.hasNext()) {
                 layoutHelper = iterator.next();
                 layoutHelper.beforeLayout(recycler, state, this);
@@ -470,9 +470,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
             mNested = 0;
             final int startPosition = findFirstVisibleItemPosition();
             final int endPosition = findLastVisibleItemPosition();
-            List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-            Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-            com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+            List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+            Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+            LayoutHelper layoutHelper = null;
             while (iterator.hasNext()) {
                 layoutHelper = iterator.next();
                 try {
@@ -492,10 +492,10 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
     public void runAdjustLayout() {
         final int startPosition = findFirstVisibleItemPosition();
-        final com.ashlikun.vlayout.LayoutHelper firstLayoutHelper = mHelperFinder.getLayoutHelper(startPosition);
+        final LayoutHelper firstLayoutHelper = mHelperFinder.getLayoutHelper(startPosition);
         final int endPosition = findLastVisibleItemPosition();
-        final com.ashlikun.vlayout.LayoutHelper lastLayoutHelper = mHelperFinder.getLayoutHelper(endPosition);
-        List<com.ashlikun.vlayout.LayoutHelper> totalLayoutHelpers = mHelperFinder.getLayoutHelpers();
+        final LayoutHelper lastLayoutHelper = mHelperFinder.getLayoutHelper(endPosition);
+        List<LayoutHelper> totalLayoutHelpers = mHelperFinder.getLayoutHelpers();
         final int start = totalLayoutHelpers.indexOf(firstLayoutHelper);
         final int end = totalLayoutHelpers.indexOf(lastLayoutHelper);
         for (int i = start; i <= end; i++) {
@@ -619,9 +619,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
         int startPosition = findFirstVisibleItemPosition();
         int endPosition = findLastVisibleItemPosition();
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.onScrollStateChanged(state, startPosition, endPosition, this);
@@ -632,9 +632,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     public void offsetChildrenHorizontal(int dx) {
         super.offsetChildrenHorizontal(dx);
 
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.onOffsetChildrenHorizontal(dx, this);
@@ -645,9 +645,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     @Override
     public void offsetChildrenVertical(int dy) {
         super.offsetChildrenVertical(dy);
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.onOffsetChildrenVertical(dy, this);
@@ -672,24 +672,24 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
     private LayoutStateWrapper mTempLayoutStateWrapper = new LayoutStateWrapper();
 
-    private List<Pair<com.ashlikun.vlayout.Range<Integer>, Integer>> mRangeLengths = new ArrayList<>();
+    private List<Pair<Range<Integer>, Integer>> mRangeLengths = new ArrayList<>();
 
     @Nullable
-    private int findRangeLength(@NonNull final com.ashlikun.vlayout.Range<Integer> range) {
+    private int findRangeLength(@NonNull final Range<Integer> range) {
         final int count = mRangeLengths.size();
         if (count == 0) {
             return -1;
         }
 
         int s = 0, e = count - 1, m = -1;
-        Pair<com.ashlikun.vlayout.Range<Integer>, Integer> rs = null;
+        Pair<Range<Integer>, Integer> rs = null;
 
         // 二进制搜索范围
         while (s <= e) {
             m = (s + e) / 2;
             rs = mRangeLengths.get(m);
 
-            com.ashlikun.vlayout.Range<Integer> r = rs.first;
+            Range<Integer> r = rs.first;
             if (r == null) {
                 rs = null;
                 break;
@@ -714,7 +714,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     protected void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state, LayoutState layoutState, com.ashlikun.vlayout.layout.LayoutChunkResult result) {
         final int position = layoutState.mCurrentPosition;
         mTempLayoutStateWrapper.mLayoutState = layoutState;
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = mHelperFinder == null ? null : mHelperFinder.getLayoutHelper(position);
+        LayoutHelper layoutHelper = mHelperFinder == null ? null : mHelperFinder.getLayoutHelper(position);
         if (layoutHelper == null) {
             layoutHelper = mDefaultLayoutHelper;
         }
@@ -738,11 +738,11 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
             final int consumed = result.mIgnoreConsumed ? 0 : result.mConsumed;
 
             // TODO: 支持reverseLayout时发生更改
-            com.ashlikun.vlayout.Range<Integer> range = new com.ashlikun.vlayout.Range<>(Math.min(position, positionAfterLayout), Math.max(position, positionAfterLayout));
+            Range<Integer> range = new Range<>(Math.min(position, positionAfterLayout), Math.max(position, positionAfterLayout));
 
             final int idx = findRangeLength(range);
             if (idx >= 0) {
-                Pair<com.ashlikun.vlayout.Range<Integer>, Integer> pair = mRangeLengths.get(idx);
+                Pair<Range<Integer>, Integer> pair = mRangeLengths.get(idx);
                 if (pair != null && pair.first.equals(range) && pair.second == consumed) {
                     return;
                 }
@@ -774,7 +774,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
         }
 
         int position = getPosition(view);
-        final int idx = findRangeLength(com.ashlikun.vlayout.Range.create(position, position));
+        final int idx = findRangeLength(Range.create(position, position));
         if (idx < 0 || idx >= mRangeLengths.size()) {
             return -1;
         }
@@ -791,16 +791,16 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     }
 
 
-    private static com.ashlikun.vlayout.LayoutHelper DEFAULT_LAYOUT_HELPER = new DefaultLayoutHelper();
+    private static LayoutHelper DEFAULT_LAYOUT_HELPER = new DefaultLayoutHelper();
 
-    private com.ashlikun.vlayout.LayoutHelper mDefaultLayoutHelper = DEFAULT_LAYOUT_HELPER;
+    private LayoutHelper mDefaultLayoutHelper = DEFAULT_LAYOUT_HELPER;
 
     /**
      * 更改默认LayoutHelper
      *
      * @param layoutHelper 默认layoutHelper应用于没有指定layoutHelpers的项目，它不应为空
      */
-    private void setDefaultLayoutHelper(@NonNull final com.ashlikun.vlayout.LayoutHelper layoutHelper) {
+    private void setDefaultLayoutHelper(@NonNull final LayoutHelper layoutHelper) {
         //noinspection ConstantConditions
         if (layoutHelper == null) {
             throw new IllegalArgumentException("layoutHelper should not be null");
@@ -861,9 +861,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
     @Override
     public void onItemsChanged(RecyclerView recyclerView) {
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.onItemsChanged(this);
@@ -918,9 +918,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
         super.onDetachedFromWindow(view, recycler);
 
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             layoutHelper.clear(this);
@@ -1060,7 +1060,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
 
         /**
-         * 这 {@link #layoutChunk(RecyclerView.Recycler, RecyclerView.State, LayoutState, com.ashlikun.vlayout.layout.LayoutChunkResult)}通行证处于布局或滚动状态
+         * 这 {@link #layoutChunk(RecyclerView.Recycler, RecyclerView.State, LayoutState, layout.LayoutChunkResult)}通行证处于布局或滚动状态
          */
         public boolean isRefreshLayout() {
             return mLayoutState.mOnRefresLayout;
@@ -1147,9 +1147,9 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
 
         // TODO: support zIndex?
         List<View> views = new LinkedList<>();
-        List<com.ashlikun.vlayout.LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
-        Iterator<com.ashlikun.vlayout.LayoutHelper> iterator = layoutHelpers.iterator();
-        com.ashlikun.vlayout.LayoutHelper layoutHelper = null;
+        List<LayoutHelper> layoutHelpers = mHelperFinder.getLayoutHelpers();
+        Iterator<LayoutHelper> iterator = layoutHelpers.iterator();
+        LayoutHelper layoutHelper = null;
         while (iterator.hasNext()) {
             layoutHelper = iterator.next();
             View fixedView = layoutHelper.getFixedView();
@@ -1162,7 +1162,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     }
 
 
-    private com.ashlikun.vlayout.LayoutViewFactory mLayoutViewFatory = new com.ashlikun.vlayout.LayoutViewFactory() {
+    private LayoutViewFactory mLayoutViewFatory = new LayoutViewFactory() {
         @Override
         public View generateLayoutView(@NonNull Context context) {
             return new LayoutView(context);
@@ -1280,7 +1280,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
     }
 
     @Override
-    public com.ashlikun.vlayout.OrientationHelperEx getMainOrientationHelper() {
+    public OrientationHelperEx getMainOrientationHelper() {
         return mOrientationHelper;
     }
 
@@ -1372,7 +1372,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
                 View v = getChildAt(idx);
                 int pos = getPosition(v);
                 if (pos != RecyclerView.NO_POSITION) {
-                    com.ashlikun.vlayout.LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(pos);
+                    LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(pos);
                     if (layoutHelper == null || layoutHelper.isRecyclable(pos, startPos, endPos, this, true)) {
                         removeAndRecycleViewAt(idx, recycler);
                     } else {
@@ -1394,7 +1394,7 @@ public class VirtualLayoutManager extends com.ashlikun.vlayout.ExposeLinearLayou
                 View v = getChildAt(i);
                 int pos = getPosition(v);
                 if (pos != RecyclerView.NO_POSITION) {
-                    com.ashlikun.vlayout.LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(pos);
+                    LayoutHelper layoutHelper = mHelperFinder.getLayoutHelper(pos);
                     if (layoutHelper == null || layoutHelper.isRecyclable(pos, startPos, endPos, this, false)) {
                         removeAndRecycleViewAt(i, recycler);
                     }

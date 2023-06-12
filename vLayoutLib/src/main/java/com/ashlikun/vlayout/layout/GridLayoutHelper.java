@@ -542,7 +542,7 @@ public class GridLayoutHelper extends BaseLayoutHelper {
             }
 
             if (VLayoutUtils.isDebug) {
-                Log.d(TAG, "layout item in position: " + params.getViewLayoutPosition() + " with text " + ((TextView) view).getText() + " with SpanIndex: " + index + " into (" +
+                Log.d(TAG, "layout item in position: " + params.getViewLayoutPosition() + " with SpanIndex: " + index + " into (" +
                         left + ", " + top + ", " + right + ", " + bottom + " )");
             }
 
